@@ -1,7 +1,7 @@
 # Automatyczna klasyfikacja faktur z wykorzystaniem AI
 
 Projekt przedstawia kompletny system automatyzujący obsługę faktur otrzymywanych e-mailem.  
-Workflow został przygotowany w środowisku **n8n** i wykorzystuje **sztuczną inteligencję (Gemini / OpenAI)** do rozpoznawania rodzaju faktury.
+Workflow został przygotowany w środowisku **n8n** i wykorzystuje **sztuczną inteligencję (Gemini)** do rozpoznawania rodzaju faktury.
 
 ![Schemat działania](assets/workflow_screen.png)
 
@@ -38,14 +38,7 @@ Działa całkowicie samodzielnie – bez konieczności ręcznego pobierania, ana
 
 ---
 
-## Korzyści
 
-- **Pełna automatyzacja obiegu faktur** – od e-maila po zapis w odpowiednim folderze.  
-- **Minimalizacja pracy ręcznej** i ryzyka błędów przy sortowaniu.  
-- **Szybki dostęp** do faktur uporządkowanych według kategorii i dat.  
-- **Łatwiejsze rozliczenia** i lepszy porządek w dokumentach finansowych.
-
----
 
 ## Uruchomienie projektu
 
@@ -64,7 +57,9 @@ cd n8n_invoices_categorization
 
 
 #### 2 - Uruchom kontener n8n
+Po uruchomieniu aplikacji *powershell*
 ```powershell
+cd (..) #w miejsce (..) nalezy wstawic lokalizcje, do której pobrane sklonowane zostało repozytorium
 docker compose up -d
 ```
 Aplikacja będzie dostępna pod adresem:
@@ -83,8 +78,24 @@ http://localhost:5678
     - Google Gemini (Google Gemini(PaLM) Api).
 - po uzupełnieniu, wystarczy zapisać workflow i nacisnąć przycisk *Active*.
 
+#### 5 - Wyłączenie kontenera
+
+(w aplikacji *powershell*, w której uruchomiony jest kontener)
+```
+docker compose down
+```
+
 ---
 ## Bezpieczeństwo
 Dane logowania (Gmail, Google Drive, AI) są przechowywane lokalnie w bazie n8n (database.sqlite) i **nie są częścią repozytorium**. Plik ten zostanie utworzony przy pierwszym uruchomieniu konteneru.
 
 Plik .gitignore wyklucza wszelkie poufne dane, logi i ustawienia środowiska.
+
+
+## Korzyści
+
+- **Pełna automatyzacja obiegu faktur** – od e-maila po zapis w odpowiednim folderze.  
+- **Minimalizacja pracy ręcznej** i ryzyka błędów przy sortowaniu.  
+- **Szybki dostęp** do faktur uporządkowanych według kategorii i dat.  
+- **Łatwiejsze rozliczenia** i lepszy porządek w dokumentach finansowych.
+
