@@ -1,0 +1,806 @@
+{
+  "name": "workflow_invoices",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "includeSpamTrash": true,
+          "q": "has:attachment"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        -96
+      ],
+      "id": "4f67a01a-d474-4d0d-bfa6-58ef2b08812c",
+      "name": "Gmail Trigger",
+      "notesInFlow": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "impNelzws9XL1zSd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "attachment_0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        608,
+        96
+      ],
+      "id": "936cf8a5-0210-4dca-929f-ee6dede53a20",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Masz do dyspozycji tekst faktury odczytanej z OCR. Twoim zadaniem jest sklasyfikować fakturę do jednej z dwóch kategorii:\n\n1. \"Przychody\" – faktura sprzedaży wystawiona przez firmę dla klienta.\n2. \"Koszty\" – faktura zakupu otrzymana od dostawcy.\n\nZwróć tylko jedną etykietę: \"Przychody\" lub \"Koszty\".\n\nZwróć szczególną uwagę na te słowa i pola:\n- Przychody: \"Sprzedawca\", \"Nabywca\", \"Faktura sprzedaży\", \"Kwota brutto\", \"VAT należny\", \"Do zapłaty\", \"Data sprzedaży\"\n- Koszty: \"Dostawca\", \"Odbiorca\", \"Faktura zakupu\", \"Kwota brutto\", \"VAT naliczony\", \"Data otrzymania\", \"Numer zamówienia\", \"Faktura kosztowa\"\n\nTekst faktury:\n\"\"\"\n{{ $json.text }}\n\"\"\"\n\nW przypadku, kiedy uznasz że załącznik nie jest fakturą, zwróć \"Blad\".\n\nDodatkowo, odnajdz date wystawienia faktury. Jeśli nie jesteś w stanie jej znaleźć, to przekaż dalej tą date: {{ $('Gmail').item.json.date }} - przekaż to tylko w takim formacie: \"rok - miesiąc - dzień\" - pomiń godzinę itp.\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        96
+      ],
+      "id": "5fe28f8d-361a-4462-90a9-f549ffc7fa8b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        848,
+        304
+      ],
+      "id": "07369271-ed75-4060-8c5d-8676e2e9ff8e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bD4ShBpi01ftwpMj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ $json.attachments }}",
+        "name": "={{ $('Gmail').item.binary.attachment_0.fileName }}\n",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)",
+          "cachedResultUrl": "https://drive.google.com/drive"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1312,
+        -160
+      ],
+      "id": "c543cd1c-a6db-4c83-9dff-147d9c5c23bd",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "18lNQEObjxxTnDop",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        368,
+        -96
+      ],
+      "id": "3bc99847-d08e-4fc1-a396-095c94ed8410",
+      "name": "Gmail",
+      "webhookId": "f2526725-c923-4283-bbd5-7e9f0e4954a2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "impNelzws9XL1zSd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "attachments",
+        "include": "allOtherFields",
+        "options": {
+          "includeBinary": true
+        }
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -352
+      ],
+      "id": "cd9e78e2-db54-4b1e-9c91-f41488cc7708",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"output\": \"sprzedaz\",\n    \"date_read\": \"2025-10-12\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1072,
+        320
+      ],
+      "id": "a47539ea-15ff-4734-8411-0575400d4da5",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Merge').item.json.file_id}}",
+          "mode": "id"
+        },
+        "name": "={{ $json.output.date_read}}_{{ $('Merge').item.json.file_name}}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1WMOUKhTxeThSURbLNx13QqzalSTpSwbI",
+          "mode": "list",
+          "cachedResultName": "Przychody",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1WMOUKhTxeThSURbLNx13QqzalSTpSwbI"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2688,
+        -368
+      ],
+      "id": "911bbe84-4bfa-4aa7-9103-9a6793923a3c",
+      "name": "Copy file - Przychody",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "18lNQEObjxxTnDop",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Upload file').item.json.id }}",
+          "mode": "id"
+        },
+        "name": "={{ $json.output.date_read}}_{{ $('Merge').item.json.file_name}}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1OXOKAPKbufxx1Izlt-WQMScahVmkZwhB",
+          "mode": "list",
+          "cachedResultName": "Koszty",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1OXOKAPKbufxx1Izlt-WQMScahVmkZwhB"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2688,
+        -208
+      ],
+      "id": "bbf2b7f9-e044-42f8-a079-807ebd37639b",
+      "name": "Copy file - Koszty",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "18lNQEObjxxTnDop",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "message_id",
+              "field2": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1168,
+        -160
+      ],
+      "id": "e0719b6c-97a2-4e59-bc7a-8c688f6ee918",
+      "name": "Merge-attachment_split"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail').item.json.id }}",
+        "labelIds": [
+          "Label_8251097043188318365"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2688,
+        112
+      ],
+      "id": "c531a843-70d2-46b6-8edb-036d8fa8255d",
+      "name": "Add label to message",
+      "webhookId": "9c43d236-7efb-49ec-a81d-ffb4a1e1e8b7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "impNelzws9XL1zSd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1760,
+        -32
+      ],
+      "id": "6e4e1e7f-0848-42b6-bbdd-c53cd43830f1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('AI Agent').item.json.output.output }}",
+                    "rightValue": "Koszty",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c90cc155-8123-4d58-ad98-b7f77176987f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Koszty"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3293d2df-98f2-461d-8918-2ae6d67e0267",
+                    "leftValue": "={{ $('AI Agent').item.json.output.output }}",
+                    "rightValue": "Koszty",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        2096,
+        -192
+      ],
+      "id": "31127c3c-a511-4fb1-911a-b5565769f278",
+      "name": "Switch-Koszty"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('AI Agent').item.json.output.output }}",
+                    "rightValue": "Przychody",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c90cc155-8123-4d58-ad98-b7f77176987f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Przychody"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3293d2df-98f2-461d-8918-2ae6d67e0267",
+                    "leftValue": "={{ $('AI Agent').item.json.output.output }}",
+                    "rightValue": "Przychody",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "allMatchingOutputs": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        2096,
+        -352
+      ],
+      "id": "9e34f357-18e0-4abd-b913-222ecf4b6ceb",
+      "name": "Switch-Przychody"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('AI Agent').item.json.output.output }}",
+                    "rightValue": "Blad",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c90cc155-8123-4d58-ad98-b7f77176987f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Blad"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3293d2df-98f2-461d-8918-2ae6d67e0267",
+                    "leftValue": "={{ $('AI Agent').item.json.output.output }}",
+                    "rightValue": "Blad",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        2096,
+        128
+      ],
+      "id": "d1e1cc1f-9e92-4363-8fc6-1885a5a0545b",
+      "name": "Switch-Blad"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8b78cd4a-7ec1-4772-a877-6c0f7560c84e",
+              "name": "file_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "397b5df2-6d0d-48c9-bd60-60a576fe55c1",
+              "name": "file_name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        -160
+      ],
+      "id": "ef66f96b-4995-4e08-8063-b0f296f765f1",
+      "name": "mapping_file_id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0490d6bb-aeab-4d87-86af-8916e5a1d797",
+              "name": "attachments",
+              "value": "={{ $('Gmail').item.binary.keys() }}",
+              "type": "array"
+            },
+            {
+              "id": "4d9942c0-c7cc-44ca-a7b1-6dadf92da7e8",
+              "name": "message_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "07bcbb6b-6d74-4584-ac6c-0676e0f23078",
+              "name": "=",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        -352
+      ],
+      "id": "25abfb44-99ae-4bf0-930c-2bf3d496cecb",
+      "name": "mapping_multiple_pdfs"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        384
+      ],
+      "id": "352e3eb4-c60a-49a2-8835-8507b9262fbf",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "mapping_multiple_pdfs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge-attachment_split",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge-attachment_split",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "mapping_file_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge-attachment_split": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Switch-Przychody",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Switch-Blad",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Switch-Koszty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch-Koszty": {
+      "main": [
+        [
+          {
+            "node": "Copy file - Koszty",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch-Przychody": {
+      "main": [
+        [
+          {
+            "node": "Copy file - Przychody",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch-Blad": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mapping_file_id": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mapping_multiple_pdfs": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2ee5b5c2-e059-4a58-a779-5a6241dcc329",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b1d22737ee4053d605fc6d11cef469a7c80c5ffe4dbdd57fcae5cdcf318cc21"
+  },
+  "id": "3bgpaVRHgNHA0BjJ",
+  "tags": []
+}

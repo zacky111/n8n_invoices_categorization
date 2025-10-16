@@ -9,3 +9,4 @@ services:
     volumes:
       - ./data:/home/node/.n8n
     restart: unless-stopped
+    
