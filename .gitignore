@@ -1,2 +1,6 @@
 # n8n local data
 data/
+
+
+#pdf md export
+.pdf

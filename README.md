@@ -57,7 +57,7 @@ cd n8n_invoices_categorization
 
 
 #### 2 - Uruchom kontener n8n
-Po uruchomieniu aplikacji *powershell*
+Po uruchomieniu aplikacji *Powershell* (Windows) / *Terminal* (macOS)
 ```powershell
 cd (..) #w miejsce (..) nalezy wstawic lokalizcje, do której pobrane sklonowane zostało repozytorium
 docker compose up -d
@@ -80,7 +80,7 @@ http://localhost:5678
 
 #### 5 - Wyłączenie kontenera
 
-(w aplikacji *powershell*, w której uruchomiony jest kontener)
+(w aplikacji *Powershell* / *Terminal*, w której uruchomiony jest kontener)
 ```
 docker compose down
 ```
