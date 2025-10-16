@@ -59,15 +59,15 @@ cd n8n_invoices_categorization
 #### 2 - Uruchom kontener n8n
 Po uruchomieniu aplikacji *Powershell* (Windows) / *Terminal* (macOS) oraz *Docker Desktop*
 ```powershell
-cd (..) #w miejsce (..) nalezy wstawic lokalizcje, do której pobrane sklonowane zostało repozytorium
+cd (..) #w miejsce (..) nalezy wstawic lokalizacje, do której sklonowane zostało repozytorium
 docker compose up -d
 ```
 Aplikacja będzie dostępna pod adresem:
 http://localhost:5678
 
 #### 3 - Import pliku workflow
-- Otwórz n8n w przeglądarce.
-- Utwórz nowy workflow (przycisk "+" w prawym górnym rogu interfejsu użytkownika).
+- Otwórz *n8n* w przeglądarce.
+- Utwórz nowy workflow (przycisk "*+*" w prawym górnym rogu interfejsu użytkownika).
 - Kliknij *Import workflow*.
 - Wskaż plik: `workflow_task_invoices.json`.
 
