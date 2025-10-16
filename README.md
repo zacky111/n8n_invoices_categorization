@@ -45,7 +45,7 @@ Działa całkowicie samodzielnie – bez konieczności ręcznego pobierania, ana
 ### Wymagania
 - Zainstalowany **Docker** i **Docker Compose**
 - Konto Google z dostępem do Gmail i Google Drive (do konfiguracji połączeń)
-- Klucz API do modelu AI (Gemini / OpenAI)
+- Klucz API do modelu AI (Gemini)
 
 ---
 
@@ -57,7 +57,7 @@ cd n8n_invoices_categorization
 
 
 #### 2 - Uruchom kontener n8n
-Po uruchomieniu aplikacji *Powershell* (Windows) / *Terminal* (macOS)
+Po uruchomieniu aplikacji *Powershell* (Windows) / *Terminal* (macOS) oraz *Docker Desktop*
 ```powershell
 cd (..) #w miejsce (..) nalezy wstawic lokalizcje, do której pobrane sklonowane zostało repozytorium
 docker compose up -d
